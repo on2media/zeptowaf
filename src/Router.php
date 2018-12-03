@@ -29,6 +29,41 @@ class Router
         $this->action('POST', $regexp, $controller, $method);
     }
 
+    public function put($regexp, $controller, $method)
+    {
+        $this->action('PUT', $regexp, $controller, $method);
+    }
+
+    public function delete($regexp, $controller, $method)
+    {
+        $this->action('DELETE', $regexp, $controller, $method);
+    }
+
+    public function resource($regexpMany, $regexpOne, $controller)
+    {
+        $mapping = [
+            'many' => [
+                'GET' => 'index',
+                'POST' => 'store',
+            ],
+            'one' => [
+                'GET' => 'show',
+                'PUT' => 'update',
+                'DELETE' => 'destroy',
+            ],
+        ];
+        foreach ($mapping as $type => $map) {
+            foreach ($map as $requestMethod => $method) {
+                $this->action(
+                    $requestMethod,
+                    ($type == 'many' ? $regexpMany : $regexpOne),
+                    $controller,
+                    $method
+                );
+            }
+        }
+    }
+
     private function action($requestMethod, $regexp, $controller, $method)
     {
         $this->routes[$requestMethod][$regexp] = [
