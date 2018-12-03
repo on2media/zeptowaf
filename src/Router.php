@@ -8,15 +8,13 @@ class Router
     private $container;
 
     private $routes;
+    private $before = [];
 
     public function __construct(Request $request, &$container)
     {
         $this->request = $request;
         $this->container = &$container;
-        $this->routes = [
-            'GET' => [],
-            'POST' => [],
-        ];
+        $this->routes = [];
     }
 
     public function get($regexp, $controller, $method)
@@ -66,26 +64,59 @@ class Router
 
     private function action($requestMethod, $regexp, $controller, $method)
     {
-        $this->routes[$requestMethod][$regexp] = [
+        $this->routes[$regexp][$requestMethod] = [
             'controller' => $controller,
             'method' => $method,
         ];
+        if ($this->before !== []) {
+            $this->routes[$regexp][$requestMethod]['before'] = $this->before;
+        }
+    }
+
+    public function before($callback, $controller, $method)
+    {
+        $this->before[] = [
+            'controller' => $controller,
+            'method' => $method,
+        ];
+        $callback($this);
+        array_pop($this->before);
     }
 
     public function route()
     {
-        $availableRoutes = $this->routes[$this->request->getMethod()];
-        foreach ($availableRoutes as $regexp => $route) {
+        foreach ($this->routes as $regexp => $routes) {
             if (preg_match($regexp, $this->request->getUri(), $params) === 1) {
-                $ctrlName = $route['controller'];
-                $ctrl = new $ctrlName($this->request, $this->container);
-                if (!is_a($ctrl, '\On2Media\Zeptowaf\Routable')) {
-                    throw new \Exception('Controller isn\'t routable');
+                $route = $routes[$this->request->getMethod()] ?? null;
+                if ($route === null) {
+                    throw new Exception\MethodNotAllowed('Method not allowed');
+                } else {
+                    if (isset($route['before'])) {
+                        foreach ($route['before'] as $routeBefore) {
+                            $this->callController($routeBefore);
+                        }
+                    }
+                    return $this->callController($route, $params);
                 }
-                return $ctrl->{$route['method']}($params);
             }
         }
 
-        throw new NotFoundException('Page not found');
+        throw new Exception\NotFound('Page not found');
+    }
+
+    private function callController(array $route, array $params = null)
+    {
+        $ctrlName = $route['controller'];
+        $ctrl = new $ctrlName($this->request, $this->container);
+        if (!is_a($ctrl, '\On2Media\Zeptowaf\Routable')) {
+            throw new Exception\Exception('Controller isn\'t routable');
+        }
+        if (!method_exists($ctrl, $route['method'])) {
+            throw new Exception\Exception('Method does not exist');
+        }
+        if ($params === null) {
+            return $ctrl->{$route['method']}();
+        }
+        return $ctrl->{$route['method']}($params);
     }
 }
