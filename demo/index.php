@@ -3,7 +3,8 @@
 require_once __DIR__ . '/../src/Request.php';
 require_once __DIR__ . '/../src/Routable.php';
 require_once __DIR__ . '/../src/Router.php';
-require_once __DIR__ . '/../src/NotFoundException.php';
+require_once __DIR__ . '/../src/Exception/Exception.php';
+require_once __DIR__ . '/../src/Exception/NotFound.php';
 
 require_once __DIR__ . '/app/Demo.php';
 
@@ -22,7 +23,7 @@ try {
 
     $router->route();
 
-} catch (\On2Media\Zeptowaf\NotFoundException $e) {
+} catch (\On2Media\Zeptowaf\Exception\NotFound $e) {
 
     echo 'Not Found: ' . $e->getMessage();
     exit;
