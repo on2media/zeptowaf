@@ -96,12 +96,21 @@ class Router
                             $this->callController($routeBefore);
                         }
                     }
-                    return $this->callController($route, $params);
+                    try {
+                        $this->callController($route, $params);
+                        $routed = true;
+                    } catch (Exception\NotRouted $e) {
+                        if (!isset($routed)) {
+                            $routed = false;
+                        }
+                    }
                 }
             }
         }
 
-        throw new Exception\NotFound('Page not found');
+        if (!isset($routed) || $routed === false) {
+            throw new Exception\NotFound('Page not found');
+        }
     }
 
     private function callController(array $route, array $params = null)
