@@ -98,19 +98,15 @@ class Router
                     }
                     try {
                         $this->callController($route, $params);
-                        $routed = true;
+                        return;
                     } catch (Exception\NotRouted $e) {
-                        if (!isset($routed)) {
-                            $routed = false;
-                        }
+                        // find the next matching route
                     }
                 }
             }
         }
 
-        if (!isset($routed) || $routed === false) {
-            throw new Exception\NotFound('Page not found');
-        }
+        throw new Exception\NotFound('Page not found');
     }
 
     private function callController(array $route, array $params = null)
