@@ -97,8 +97,7 @@ class Router
                         }
                     }
                     try {
-                        $this->callController($route, $params);
-                        return;
+                        return $this->callController($route, $params);
                     } catch (Exception\NotRouted $e) {
                         // find the next matching route
                     }
