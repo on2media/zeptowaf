@@ -111,7 +111,12 @@ class Router
     private function callController(array $route, array $params = null)
     {
         $ctrlName = $route['controller'];
-        $ctrl = new $ctrlName($this->request, $this->container);
+        if ($this->container instanceof Container &&
+            $this->container->has($ctrlName)) {
+            $ctrl = $this->container->get($ctrlName);
+        } else {
+            $ctrl = new $ctrlName($this->request, $this->container);
+        }
         if (!is_a($ctrl, '\On2Media\Zeptowaf\Routable')) {
             throw new Exception\Exception('Controller isn\'t routable');
         }
