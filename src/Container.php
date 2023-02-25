@@ -31,7 +31,7 @@ class Container implements \ArrayAccess, ContainerInterface
         return array_key_exists($id, $this->entries);
     }
 
-    public function get(string $id)
+    public function get(string $id): mixed
     {
         if (!$this->has($id)) {
             throw new Exception\Container('Entry `'.$id.'` not found in container');
@@ -42,31 +42,31 @@ class Container implements \ArrayAccess, ContainerInterface
         return $this->entries[$id];
     }
 
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         $this->isValidId($offset);
         $this->set($offset, $value);
     }
 
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         $this->isValidId($offset);
         return $this->has($offset);
     }
 
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         $this->isValidId($offset);
         return $this->get($offset);
     }
 
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
         $this->isValidId($offset);
         $this->unset($offset);
     }
 
-    private function isValidId($id)
+    private function isValidId(mixed $id): void
     {
         if (!is_string($id)) {
             throw new Exception\Exception('Container IDs must be strings');
