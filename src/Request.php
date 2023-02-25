@@ -86,12 +86,4 @@ class Request
     {
         return $this->query;
     }
-
-    private function __clone()
-    {
-    }
-
-    private function __wakeup()
-    {
-    }
 }
