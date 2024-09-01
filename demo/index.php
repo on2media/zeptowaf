@@ -18,7 +18,7 @@ $container->set(ContainerDemo::class, static function ($container) {
 $container->set(RoutableDemo::class, static function ($container) {
     return new RoutableDemo(
         $container->get(ContainerDemo::class),
-        $container->get('env')
+        $container->get('foo')
     );
 });
 
@@ -34,7 +34,7 @@ $container->set(RoutableDemo::class, static function ($container) {
 // $container->set(RoutableDemo::class, static function ($container) {
 //     return new RoutableDemo(
 //         $container->get(ContainerDemo::class),
-//         $container->get('env')
+//         $container->get('foo')
 //     );
 // });
 

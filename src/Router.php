@@ -115,10 +115,10 @@ class Router
             $this->container->has($ctrlName)) {
             $ctrl = $this->container->get($ctrlName);
         } else {
+            if (!is_a($ctrlName, \On2Media\Zeptowaf\Routable::class, true)) {
+                throw new Exception\Exception('Controller isn\'t routable');
+            }
             $ctrl = new $ctrlName($this->request, $this->container);
-        }
-        if (!is_a($ctrl, '\On2Media\Zeptowaf\Routable')) {
-            throw new Exception\Exception('Controller isn\'t routable');
         }
         if (!method_exists($ctrl, $route['method'])) {
             throw new Exception\Exception('Method does not exist');
