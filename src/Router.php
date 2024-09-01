@@ -123,9 +123,11 @@ class Router
         if (!method_exists($ctrl, $route['method'])) {
             throw new Exception\Exception('Method does not exist');
         }
-        if ($params === null) {
-            return $ctrl->{$route['method']}();
-        }
-        return $ctrl->{$route['method']}($params);
+        return $ctrl->{$route['method']}(...$this->methodParams($params));
+    }
+
+    protected function methodParams(array $routeParams = null)
+    {
+        return [$routeParams];
     }
 }
