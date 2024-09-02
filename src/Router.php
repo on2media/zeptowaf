@@ -93,7 +93,9 @@ class Router
                 } else {
                     if (isset($route['before'])) {
                         foreach ($route['before'] as $routeBefore) {
-                            $this->callController($routeBefore);
+                            if (($response = $this->callController($routeBefore, $params)) !== null) {
+                                return $response;
+                            }
                         }
                     }
                     try {
