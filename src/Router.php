@@ -4,11 +4,11 @@ namespace On2Media\Zeptowaf;
 
 class Router
 {
-    private $request;
-    private $container;
+    protected $request;
+    protected $container;
 
-    private $routes;
-    private $before = [];
+    protected $routes;
+    protected $before = [];
 
     public function __construct(Request $request, &$container)
     {
@@ -62,7 +62,7 @@ class Router
         }
     }
 
-    private function action($requestMethod, $regexp, $controller, $method)
+    protected function action($requestMethod, $regexp, $controller, $method)
     {
         $this->routes[$regexp][$requestMethod] = [
             'controller' => $controller,
@@ -110,7 +110,7 @@ class Router
         throw new Exception\NotFound('Page not found');
     }
 
-    private function callController(array $route, array $params = null)
+    protected function callController(array $route, array $params = null)
     {
         $ctrlName = $route['controller'];
         if ($this->container instanceof Container &&
