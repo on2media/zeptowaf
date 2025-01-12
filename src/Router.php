@@ -87,7 +87,7 @@ class Router
     {
         foreach ($this->routes as $regexp => $routes) {
             if (preg_match($regexp, $this->request->getUri(), $params) === 1) {
-                $route = $routes[$this->request->getMethod()] ?? null;
+                $route = $routes[$this->requestMethod()] ?? null;
                 if ($route === null) {
                     throw new Exception\MethodNotAllowed('Method not allowed');
                 } else {
@@ -108,6 +108,22 @@ class Router
         }
 
         throw new Exception\NotFound('Page not found');
+    }
+
+    protected function requestMethod()
+    {
+        $method = $this->request->getMethod();
+
+        if ($method === 'POST') {
+            $input = array_change_key_case($_POST);
+            if (isset($input['_method']) &&
+                in_array($input['_method'], ['PUT', 'PATCH', 'DELETE'])
+            ) {
+                return $input['_method'];
+            }
+        }
+
+        return $method;
     }
 
     protected function callController(array $route, array $params = null)
