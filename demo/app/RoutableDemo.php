@@ -1,6 +1,6 @@
 <?php
 
-class RoutableDemo extends \On2Media\Zeptowaf\Routable
+class RoutableDemo
 {
     private $demoClass;
 

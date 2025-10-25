@@ -42,7 +42,7 @@ class Request
             $path = '';
         }
         $this->path = $path;
-        $this->host = $_SERVER['HTTP_HOST'];
+        $this->host = $_SERVER['HTTP_X_FORWARDED_HOST'] ?? $_SERVER['HTTP_HOST'];
         $this->base = $this->scheme . '://' . $this->host . $this->path;
         $this->uri = rawurldecode($uri);
     }

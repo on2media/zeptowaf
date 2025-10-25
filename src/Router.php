@@ -4,11 +4,11 @@ namespace On2Media\Zeptowaf;
 
 class Router
 {
-    private $request;
-    private $container;
+    protected $request;
+    protected $container;
 
-    private $routes;
-    private $before = [];
+    protected $routes;
+    protected $before = [];
 
     public function __construct(Request $request, &$container)
     {
@@ -62,7 +62,7 @@ class Router
         }
     }
 
-    private function action($requestMethod, $regexp, $controller, $method)
+    protected function action($requestMethod, $regexp, $controller, $method)
     {
         $this->routes[$regexp][$requestMethod] = [
             'controller' => $controller,
@@ -87,13 +87,15 @@ class Router
     {
         foreach ($this->routes as $regexp => $routes) {
             if (preg_match($regexp, $this->request->getUri(), $params) === 1) {
-                $route = $routes[$this->request->getMethod()] ?? null;
+                $route = $routes[$this->requestMethod()] ?? null;
                 if ($route === null) {
                     throw new Exception\MethodNotAllowed('Method not allowed');
                 } else {
                     if (isset($route['before'])) {
                         foreach ($route['before'] as $routeBefore) {
-                            $this->callController($routeBefore);
+                            if (($response = $this->callController($routeBefore, $params)) !== null) {
+                                return $response;
+                            }
                         }
                     }
                     try {
@@ -108,24 +110,42 @@ class Router
         throw new Exception\NotFound('Page not found');
     }
 
-    private function callController(array $route, array $params = null)
+    protected function requestMethod()
+    {
+        $method = $this->request->getMethod();
+
+        if ($method === 'POST') {
+            $input = array_change_key_case($_POST);
+            if (isset($input['_method']) &&
+                in_array($input['_method'], ['PUT', 'PATCH', 'DELETE'])
+            ) {
+                return $input['_method'];
+            }
+        }
+
+        return $method;
+    }
+
+    protected function callController(array $route, array $params = null)
     {
         $ctrlName = $route['controller'];
         if ($this->container instanceof Container &&
             $this->container->has($ctrlName)) {
             $ctrl = $this->container->get($ctrlName);
         } else {
+            if (!is_a($ctrlName, \On2Media\Zeptowaf\Routable::class, true)) {
+                throw new Exception\Exception('Controller isn\'t routable');
+            }
             $ctrl = new $ctrlName($this->request, $this->container);
-        }
-        if (!is_a($ctrl, '\On2Media\Zeptowaf\Routable')) {
-            throw new Exception\Exception('Controller isn\'t routable');
         }
         if (!method_exists($ctrl, $route['method'])) {
             throw new Exception\Exception('Method does not exist');
         }
-        if ($params === null) {
-            return $ctrl->{$route['method']}();
-        }
-        return $ctrl->{$route['method']}($params);
+        return $ctrl->{$route['method']}(...$this->methodParams($params));
+    }
+
+    protected function methodParams(array $routeParams = null)
+    {
+        return [$routeParams];
     }
 }
