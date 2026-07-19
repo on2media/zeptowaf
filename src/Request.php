@@ -5,13 +5,21 @@ namespace On2Media\Zeptowaf;
 class Request
 {
     private static $instance;
+
     private $protocol;
+
     private $method;
+
     private $scheme;
+
     private $host;
+
     private $path;
+
     private $base;
+
     private $uri;
+
     private $query;
 
     public static function getInstance()
@@ -43,7 +51,7 @@ class Request
         }
         $this->path = $path;
         $this->host = $_SERVER['HTTP_X_FORWARDED_HOST'] ?? $_SERVER['HTTP_HOST'];
-        $this->base = $this->scheme . '://' . $this->host . $this->path;
+        $this->base = $this->scheme.'://'.$this->host.$this->path;
         $this->uri = rawurldecode($uri);
     }
 

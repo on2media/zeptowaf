@@ -5,9 +5,11 @@ namespace On2Media\Zeptowaf;
 class Router
 {
     protected $request;
+
     protected $container;
 
     protected $routes;
+
     protected $before = [];
 
     public function __construct(Request $request, &$container)
@@ -54,7 +56,7 @@ class Router
             foreach ($map as $requestMethod => $method) {
                 $this->action(
                     $requestMethod,
-                    ($type == 'many' ? $regexpMany : $regexpOne),
+                    $type == 'many' ? $regexpMany : $regexpOne,
                     $controller,
                     $method
                 );
@@ -90,20 +92,20 @@ class Router
                 $route = $routes[$this->requestMethod()] ?? null;
                 if ($route === null) {
                     throw new Exception\MethodNotAllowed('Method not allowed');
-                } else {
-                    if (isset($route['before'])) {
-                        foreach ($route['before'] as $routeBefore) {
-                            if (($response = $this->callController($routeBefore, $params)) !== null) {
-                                return $response;
-                            }
+                }
+                if (isset($route['before'])) {
+                    foreach ($route['before'] as $routeBefore) {
+                        if (($response = $this->callController($routeBefore, $params)) !== null) {
+                            return $response;
                         }
                     }
-                    try {
-                        return $this->callController($route, $params);
-                    } catch (Exception\NotRouted $e) {
-                        // find the next matching route
-                    }
                 }
+                try {
+                    return $this->callController($route, $params);
+                } catch (Exception\NotRouted $e) {
+                    // find the next matching route
+                }
+
             }
         }
 
@@ -126,14 +128,14 @@ class Router
         return $method;
     }
 
-    protected function callController(array $route, array $params = null)
+    protected function callController(array $route, ?array $params = null)
     {
         $ctrlName = $route['controller'];
         if ($this->container instanceof Container &&
             $this->container->has($ctrlName)) {
             $ctrl = $this->container->get($ctrlName);
         } else {
-            if (!is_a($ctrlName, \On2Media\Zeptowaf\Routable::class, true)) {
+            if (!is_a($ctrlName, Routable::class, true)) {
                 throw new Exception\Exception('Controller isn\'t routable');
             }
             $ctrl = new $ctrlName($this->request, $this->container);
@@ -144,7 +146,7 @@ class Router
         return $ctrl->{$route['method']}(...$this->methodParams($params));
     }
 
-    protected function methodParams(array $routeParams = null)
+    protected function methodParams(?array $routeParams = null)
     {
         return [$routeParams];
     }

@@ -5,12 +5,13 @@ namespace On2Media\Zeptowaf\Exception;
 class Validation extends Exception
 {
     private $errors;
+
     private $reasons;
 
     public function __construct(
         $message = null,
         $code = 0,
-        \Exception $previous = null,
+        ?\Exception $previous = null,
         array $errors = [],
         array $reasons = []
     ) {

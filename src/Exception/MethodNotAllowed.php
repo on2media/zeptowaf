@@ -2,6 +2,4 @@
 
 namespace On2Media\Zeptowaf\Exception;
 
-class MethodNotAllowed extends Exception
-{
-}
+class MethodNotAllowed extends Exception {}

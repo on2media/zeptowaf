@@ -1,6 +1,6 @@
 <?php
 
-class LegacyDemo extends \On2Media\Zeptowaf\Routable
+class LegacyDemo extends On2Media\Zeptowaf\Routable
 {
     public function getDemo()
     {

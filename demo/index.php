@@ -1,26 +1,22 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__.'/../vendor/autoload.php';
 
-require_once __DIR__ . '/app/ContainerDemo.php';
-require_once __DIR__ . '/app/LegacyDemo.php';
-require_once __DIR__ . '/app/RoutableDemo.php';
+require_once __DIR__.'/app/ContainerDemo.php';
+require_once __DIR__.'/app/LegacyDemo.php';
+require_once __DIR__.'/app/RoutableDemo.php';
 
-$request = \On2Media\Zeptowaf\Request::getInstance();
+$request = On2Media\Zeptowaf\Request::getInstance();
 
 // psr container
-$container = new \On2Media\Zeptowaf\Container();
+$container = new On2Media\Zeptowaf\Container();
 $container->set('foo', 'bar');
 $container->set('env', 'demo');
-$container->set(ContainerDemo::class, static function ($container) {
-    return new ContainerDemo($container->get('env'));
-});
-$container->set(RoutableDemo::class, static function ($container) {
-    return new RoutableDemo(
-        $container->get(ContainerDemo::class),
-        $container->get('foo')
-    );
-});
+$container->set(ContainerDemo::class, static fn($container) => new ContainerDemo($container->get('env')));
+$container->set(RoutableDemo::class, static fn($container) => new RoutableDemo(
+    $container->get(ContainerDemo::class),
+    $container->get('foo')
+));
 
 // // legacy array access (lacks lazy initialization)
 // $container = [
@@ -38,7 +34,7 @@ $container->set(RoutableDemo::class, static function ($container) {
 //     );
 // });
 
-$router = new \On2Media\Zeptowaf\Router($request, $container);
+$router = new On2Media\Zeptowaf\Router($request, $container);
 
 $router->get('/^\/$/', RoutableDemo::class, 'getDemo');
 $router->post('/^\/$/', RoutableDemo::class, 'postDemo');
@@ -48,38 +44,38 @@ try {
 
     $router->route();
 
-} catch (\On2Media\Zeptowaf\Exception\NotFound $e) {
+} catch (On2Media\Zeptowaf\Exception\NotFound $e) {
 
-    header($_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found');
-    echo 'Not Found: ' . $e->getMessage();
+    header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+    echo 'Not Found: '.$e->getMessage();
     exit;
 
-} catch (\On2Media\Zeptowaf\Exception\BadRequest $e) {
+} catch (On2Media\Zeptowaf\Exception\BadRequest $e) {
 
-    header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request');
-    echo 'Bad Request: ' . $e->getMessage();
+    header($_SERVER['SERVER_PROTOCOL'].' 400 Bad Request');
+    echo 'Bad Request: '.$e->getMessage();
     exit;
 
-} catch (\On2Media\Zeptowaf\Exception\MethodNotAllowed $e) {
+} catch (On2Media\Zeptowaf\Exception\MethodNotAllowed $e) {
 
-    header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
-    echo 'Method Not Allowed: ' . $e->getMessage();
+    header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed');
+    echo 'Method Not Allowed: '.$e->getMessage();
     exit;
 
-} catch (\On2Media\Zeptowaf\Exception\Validation $e) {
+} catch (On2Media\Zeptowaf\Exception\Validation $e) {
 
-    header($_SERVER['SERVER_PROTOCOL'] . ' 422 Unprocessable Entity');
-    echo 'Validation: ' . $e->getMessage();
+    header($_SERVER['SERVER_PROTOCOL'].' 422 Unprocessable Entity');
+    echo 'Validation: '.$e->getMessage();
     var_dump($e->getErrors());
     if ($e->getReasons() !== []) {
         var_dump($e->getReasons());
     }
     exit;
 
-} catch (\Exception $e) {
+} catch (Exception $e) {
 
-    header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error');
-    echo 'Internal Server Error: ' . $e->getMessage();
+    header($_SERVER['SERVER_PROTOCOL'].' 500 Internal Server Error');
+    echo 'Internal Server Error: '.$e->getMessage();
     exit;
 
 }
