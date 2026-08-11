@@ -4,14 +4,14 @@ namespace On2Media\Zeptowaf\Exception;
 
 class Validation extends Exception
 {
-    private $errors;
+    private array $errors;
 
-    private $reasons;
+    private array $reasons;
 
     public function __construct(
-        $message = null,
-        $code = 0,
-        ?\Exception $previous = null,
+        string $message = '',
+        int $code = 0,
+        ?\Throwable $previous = null,
         array $errors = [],
         array $reasons = []
     ) {
@@ -20,12 +20,12 @@ class Validation extends Exception
         $this->reasons = $reasons;
     }
 
-    public function getErrors()
+    public function getErrors(): array
     {
         return $this->errors;
     }
 
-    public function getReasons()
+    public function getReasons(): array
     {
         return $this->reasons;
     }
